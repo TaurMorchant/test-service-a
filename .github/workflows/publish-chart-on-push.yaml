@@ -42,7 +42,7 @@ jobs:
         run: |
           cd helm-repo/packaged-charts
           helm repo index . \
-            --url https://organization.github.io/helm-repo/
+            --url https://taurmorchant.github.io/helm-repo/
           mv index.yaml ..
         shell: bash
 
