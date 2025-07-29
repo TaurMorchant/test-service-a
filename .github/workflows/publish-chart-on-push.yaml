@@ -1,0 +1,57 @@
+name: Publish Helm Chart
+
+on:
+  push:
+    paths:
+      - 'helm-templates/service-a/**'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout service
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+
+      - name: Package Helm chart
+        run: |
+          cd helm-templates/service-a
+          VERSION=$(helm show chart . | grep "^version:" | awk '{print $2}')
+          helm package . --destination /tmp/chart-out --version "$VERSION"
+        shell: bash
+
+      - name: Checkout central repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          repository: taurmorchant/helm-repo
+          ref: gh-pages
+          token: ${{ secrets.HELM_REPO_GH_TOKEN }}
+          path: helm-repo
+
+      - name: Copy packaged chart
+        run: |
+          cp /tmp/chart-out/service-a-*.tgz helm-repo/packaged-charts/
+        shell: bash
+
+      - name: Update index.yaml
+        run: |
+          cd helm-repo/packaged-charts
+          helm repo index . \
+            --url https://organization.github.io/helm-repo/
+          mv index.yaml ..
+        shell: bash
+
+      - name: Commit & Push to gh-pages
+        run: |
+          cd helm-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add packaged-charts/*.tgz index.yaml
+          git commit -m "chore(chart): publish service-a v$VERSION"
+          git push origin gh-pages
+        shell: bash
