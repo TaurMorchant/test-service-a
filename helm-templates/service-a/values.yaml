@@ -6,3 +6,5 @@ image:
   pullPolicy: IfNotPresent
 
 containerPort: 80
+
+testImage: ghcr.io/taurmorchant/service-a:main

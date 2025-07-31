@@ -1,9 +1,11 @@
 name: Publish Helm Chart
 
 on:
-  push:
-    paths:
-      - 'helm-templates/service-a/**'
+  workflow_dispatch
+#on:
+#  push:
+#    paths:
+#      - 'helm-templates/service-a/**'
 
 jobs:
   publish:
