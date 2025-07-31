@@ -7,4 +7,4 @@ image:
 
 containerPort: 80
 
-testImage: ghcr.io/taurmorchant/service-a:main
+testImage: ghcr.io/taurmorchant/service-a:1.0.6
