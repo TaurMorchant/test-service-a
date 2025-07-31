@@ -203,6 +203,6 @@ jobs:
         uses: netcracker/qubership-workflow-hub/actions/assets-action@main
         with:
           tag: ${{ inputs.release }}
-          item-path: .cr-release-packages/*.tgz
+          item-path: /tmp/chart-out/*.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
