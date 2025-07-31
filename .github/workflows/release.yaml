@@ -153,6 +153,7 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+# replace by publishing in central repo
       - name: Run chart-releaser
         #continue-on-error: true
         uses: netcracker/chart-releaser-action@main
