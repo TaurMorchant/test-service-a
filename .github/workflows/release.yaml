@@ -14,6 +14,21 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  check-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if tag exists
+        id: check_tag
+        uses: netcracker/qubership-workflow-hub/actions/tag-action@main
+        with:
+          tag-name: '${{ inputs.release }}'
+          ref: ${{ github.ref }}
+          create-tag: false
+          check-tag: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
   load-docker-build-components:
     runs-on: ubuntu-latest
     outputs:
@@ -47,9 +62,35 @@ jobs:
           fi
           echo "components=${components}" >> $GITHUB_OUTPUT
           echo "platforms=${platforms}" >> $GITHUB_OUTPUT
-          
+  
+
+  docker-check-build:
+    needs: [load-docker-build-components, check-tag]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        component: ${{ fromJson(needs.load-docker-build-components.outputs.component) }}
+    steps:
+      - name: Get version for current component
+        id: get-version
+        run: |
+          echo "IMAGE=${{ matrix.component.name }}" >> $GITHUB_ENV
+      - name: Docker build
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@main
+        with:
+          ref: ${{ github.ref }}
+          download-artifact: false
+          dry-run: true
+          component: ${{ toJson(matrix.component) }}
+          platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
+          tags: "${{ env.IMAGE_VERSION }}"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
 
   chart-release-prepare:
+    needs: [docker-check-build]
     runs-on: ubuntu-latest
     outputs:
       images-versions: ${{ steps.update-versions.outputs.images-versions }}
@@ -95,3 +136,48 @@ jobs:
           tags: "${{ env.IMAGE_VERSION }},latest"
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+  charts-release:
+    needs: [ docker-build ]
+    continue-on-error: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: release-${{ inputs.release }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Run chart-releaser
+        #continue-on-error: true
+        uses: netcracker/chart-releaser-action@main
+        with:
+          charts_dir: operator/charts/helm
+          release_name_template: "{{ .Version }}"
+          skip_existing: true
+          skip_upload: true
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: "Release-drafter"
+        uses: netcracker/release-drafter@master
+        with:
+          config-name: release-drafter-config.yml
+          publish: true
+          name: ${{ inputs.release }}
+          tag: ${{ inputs.release }}
+          version: ${{ inputs.release }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Assets
+        uses: netcracker/qubership-workflow-hub/actions/assets-action@main
+        with:
+          tag: ${{ inputs.release }}
+          item-path: .cr-release-packages/*.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
