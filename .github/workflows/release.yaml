@@ -96,8 +96,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: service-a
-          path: |
-            target
+          path: target
           if-no-files-found: error
           retention-days: 1
 
@@ -131,7 +130,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
           download-artifact: true
-          download-artifact-path: ./artifacts
+          download-artifact-path: ./artifacts/target
           dry-run: true
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
@@ -181,7 +180,7 @@ jobs:
         with:
           ref: release-${{ inputs.release }}
           download-artifact: true
-          download-artifact-path: ./artifacts
+          download-artifact-path: ./artifacts/target
           dry-run: false
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
