@@ -97,9 +97,22 @@ jobs:
         with:
           name: service-a
           path: |
-            target/*
+            target
           if-no-files-found: error
           retention-days: 1
+
+  test-download-artifact:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: service-a
+          path: ./artifacts
+
+      - name: List contents
+        run: ls -R ./artifacts
 
   docker-check-build:
     needs: [maven-build, load-docker-build-components, check-tag]
