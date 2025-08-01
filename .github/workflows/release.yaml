@@ -101,6 +101,17 @@ jobs:
           retention-days: 1
 
 
+  maven-build-with-sonar:
+    needs: [check-tag]
+    uses: netcracker/qubership-core-infra/.github/workflows/maven-build-with-sonar.yaml@v1.0.6
+    with:
+      event-name: ${{ github.event_name }}
+      actor: ${{ github.actor }}
+      sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+
   docker-check-build:
     needs: [maven-build, load-docker-build-components, check-tag]
     runs-on: ubuntu-latest
