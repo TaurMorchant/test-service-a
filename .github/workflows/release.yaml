@@ -103,7 +103,7 @@ jobs:
 
   test-download-artifact:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [maven-build]
     steps:
       - name: Download JAR artifact
         uses: actions/download-artifact@v4
