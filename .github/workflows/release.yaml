@@ -100,18 +100,6 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  test-download-artifact:
-    runs-on: ubuntu-latest
-    needs: [maven-build]
-    steps:
-      - name: Download JAR artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: service-a
-          path: ./artifacts
-
-      - name: List contents
-        run: ls -R ./artifacts
 
   docker-check-build:
     needs: [maven-build, load-docker-build-components, check-tag]
@@ -131,6 +119,7 @@ jobs:
           ref: ${{ github.ref }}
           download-artifact: true
           download-artifact-path: ./artifacts
+          custom-image-name: service-a
           dry-run: true
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
@@ -181,6 +170,7 @@ jobs:
           ref: release-${{ inputs.release }}
           download-artifact: true
           download-artifact-path: ./artifacts
+          custom-image-name: service-a
           dry-run: false
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
