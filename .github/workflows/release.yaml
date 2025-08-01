@@ -108,6 +108,7 @@ jobs:
       event-name: ${{ github.event_name }}
       actor: ${{ github.actor }}
       sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}
+      output-artifact-name: service-a
     secrets:
       sonar-token: ${{ secrets.SONAR_TOKEN }}
 
@@ -129,8 +130,8 @@ jobs:
         with:
           ref: ${{ github.ref }}
           download-artifact: true
-          download-artifact-path: ./artifacts/${{ matrix.component.name }}
-          custom-image-name: ${{ matrix.component.name }}
+          download-artifact-path: ./artifacts/service-a
+          custom-image-name: service-a
           dry-run: true
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
@@ -180,8 +181,8 @@ jobs:
         with:
           ref: release-${{ inputs.release }}
           download-artifact: true
-          download-artifact-path: ./artifacts/${{ matrix.component.name }}
-          custom-image-name: ${{ matrix.component.name }}
+          download-artifact-path: ./artifacts/service-a
+          custom-image-name: service-a
           dry-run: false
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
