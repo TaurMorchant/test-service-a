@@ -1,7 +1,9 @@
 FROM eclipse-temurin:17-jre
 
-WORKDIR /app
+ARG BASE_PATH=.
 
-COPY ./target/my-app-*-SNAPSHOT.jar app.jar
+COPY $BASE_PATH/my-app-*-SNAPSHOT.jar app.jar
+
+WORKDIR /app
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

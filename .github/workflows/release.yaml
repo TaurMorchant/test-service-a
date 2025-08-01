@@ -130,7 +130,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
           download-artifact: true
-          download-artifact-path: ./artifacts/target
+          download-artifact-path: ./artifacts
           dry-run: true
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
@@ -180,7 +180,7 @@ jobs:
         with:
           ref: release-${{ inputs.release }}
           download-artifact: true
-          download-artifact-path: ./artifacts/target
+          download-artifact-path: ./artifacts
           dry-run: false
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}

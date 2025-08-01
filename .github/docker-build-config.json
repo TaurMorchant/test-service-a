@@ -3,7 +3,7 @@
     {
       "name": "service-a",
       "file": "Dockerfile",
-      "context": "./artifacts"
+      "context": "./artifacts/service-a"
     }
   ],
   "platforms": "linux/amd64,linux/arm64"
