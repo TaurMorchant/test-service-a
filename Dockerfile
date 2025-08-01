@@ -1,3 +1,7 @@
-FROM alpine
+FROM eclipse-temurin:17-jre
 
-CMD ["echo", "Hello, world from service-a"]
+WORKDIR /app
+
+COPY target/my-app-*-SNAPSHOT.jar app.jar
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

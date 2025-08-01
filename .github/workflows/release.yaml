@@ -64,8 +64,45 @@ jobs:
           echo "platforms=${platforms}" >> $GITHUB_OUTPUT
   
 
+  maven-build:
+    needs: [check-tag]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'temurin'
+          server-id: github
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+      - name: Build JAR artifact
+        run: mvn clean package -DskipTests
+        env:
+          MAVEN_USERNAME: ${{ secrets.maven-username }}
+          MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: service-a
+          path: |
+            target/*
+          if-no-files-found: error
+          retention-days: 1
+
   docker-check-build:
-    needs: [load-docker-build-components, check-tag]
+    needs: [maven-build, load-docker-build-components, check-tag]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -80,7 +117,7 @@ jobs:
         uses: netcracker/qubership-workflow-hub/actions/docker-action@main
         with:
           ref: ${{ github.ref }}
-          download-artifact: false
+          download-artifact-path: ./artifacts
           dry-run: true
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
@@ -129,7 +166,7 @@ jobs:
         uses: netcracker/qubership-workflow-hub/actions/docker-action@main
         with:
           ref: release-${{ inputs.release }}
-          download-artifact: false
+          download-artifact-path: ./artifacts
           dry-run: false
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
