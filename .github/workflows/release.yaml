@@ -103,7 +103,7 @@ jobs:
 
   maven-build-with-sonar:
     needs: [check-tag]
-    uses: "netcracker/qubership-core-infra/.github/workflows/maven-build-with-sonar.yaml@feature/docker-and-charts-release"
+    uses: "netcracker/qubership-core-infra/.github/workflows/maven-build-with-sonar.yaml@a08c300b066e203f79f4ba14e27575c8778c24e2"
     with:
       event-name: ${{ github.event_name }}
       actor: ${{ github.actor }}
